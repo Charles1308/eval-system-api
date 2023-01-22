@@ -16,14 +16,16 @@ export default class AuthenticationController {
 
   // Login
   public async index({ auth, request, response }: HttpContextContract) {
-    const username = request.input('username')
-    const password = request.input('password')
+    const { email, password } = request.body()
 
     try {
-      const token = await auth.use('api').attempt(username, password)
+      const userToken = await auth.use('api').attempt(email, password)
+      const { type, token, user } = userToken
 
       return response.ok({
+        type,
         token,
+        user,
         message: 'Successfully logged in',
       })
     } catch {
@@ -36,17 +38,21 @@ export default class AuthenticationController {
     const payload = await request.validate(UserValidator)
 
     const searchPayload = {
-      emai: payload.email,
-      username: payload.username,
+      email: payload.email,
     }
 
-    const user = await User.firstOrCreate(searchPayload, payload)
+    const userData = await User.firstOrCreate(searchPayload, payload)
 
-    if (user.$isLocal) {
-      const token = auth.use('api').generate(user)
+    if (userData.$isLocal) {
+      const userToken = await auth.use('api').generate(userData)
 
+      const { type, token, user } = userToken
+
+      // console.log(auth.user)
       return response.created({
+        type,
         token,
+        user,
         message: 'Account Created Successfully',
       })
     } else {
@@ -56,28 +62,37 @@ export default class AuthenticationController {
 
   // Edit Account
   public async update({ auth, request, response }: HttpContextContract) {
-    const { id } = request.params()
-    const payload = await request.validate(UserValidator)
     await auth.use('api').authenticate()
+    const user = auth.use('api').user
 
-    if (auth.use('api').isLoggedIn) {
-      const user = await User.findOrFail(id)
+    let id
+    if (user) {
+      id = user.id
 
-      try {
-        user.merge(payload)
-        await user.save()
-        const token = auth.use('api').generate(user)
+      const payload = await request.validate(UserValidator)
+      if (auth.use('api').isLoggedIn) {
+        const userDB = await User.findOrFail(id)
 
-        return response.accepted({
-          token,
-          message: 'Successfully Updated Account',
-        })
-      } catch (err) {
-        console.log('Error Auth Controller: ', err)
-        return response.internalServerError('Server Error')
+        try {
+          userDB.merge(payload)
+          await userDB.save()
+          const userToken = await auth.use('api').generate(userDB)
+
+          const { type, token, user } = userToken
+
+          return response.accepted({
+            type,
+            token,
+            user,
+            message: 'Successfully Updated Account',
+          })
+        } catch (err) {
+          console.log('Error Auth Controller: ', err)
+          return response.internalServerError('Server Error')
+        }
+      } else {
+        return response.forbidden('Please login first')
       }
-    } else {
-      return response.forbidden('Account already exist')
     }
   }
 

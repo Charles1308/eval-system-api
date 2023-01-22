@@ -21,7 +21,8 @@
     "./providers/AppProvider",
     "@adonisjs/core",
     "@adonisjs/lucid",
-    "@adonisjs/auth"
+    "@adonisjs/auth",
+    "@adonisjs/route-model-binding/build/providers/RmbProvider"
   ],
   "aceProviders": [
     "@adonisjs/repl"
@@ -39,5 +40,11 @@
   },
   "testProviders": [
     "@japa/preset-adonis/TestsProvider"
-  ]
+  ],
+  "directories": {
+    "Domain": "app/Domain"
+  },
+  "namespaces": {
+    "httpControllers": "App/Controllers/Http/v1"
+  }
 }
