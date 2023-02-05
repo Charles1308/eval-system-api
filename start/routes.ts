@@ -21,3 +21,4 @@
 
 import Route from '@ioc:Adonis/Core/Route'
 import 'App/Routes/Authentication'
+import 'App/Routes/IPCR'

@@ -68,7 +68,7 @@ export default class AuthenticationController {
     let id
     if (user) {
       id = user.id
-
+    
       const payload = await request.validate(UserValidator)
       if (auth.use('api').isLoggedIn) {
         const userDB = await User.findOrFail(id)
