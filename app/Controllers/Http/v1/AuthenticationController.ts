@@ -6,9 +6,10 @@ export default class AuthenticationController {
   // Verify
   public async verify({ auth, response }: HttpContextContract) {
     await auth.use('api').check()
+    const user = auth.use('api').user
 
     if (auth.use('api').isLoggedIn) {
-      return response.ok('Authorized')
+      return response.ok(user)
     } else {
       return response.unauthorized('Invalid credentials')
     }
