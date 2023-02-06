@@ -11,7 +11,9 @@ export default class AuthenticationController {
     if (auth.use('api').isLoggedIn) {
       return response.ok(user)
     } else {
-      return response.unauthorized('Invalid credentials')
+      return response.unauthorized({
+        message: 'Invalid credentials',
+      })
     }
   }
 
@@ -30,7 +32,9 @@ export default class AuthenticationController {
         message: 'Successfully logged in',
       })
     } catch {
-      return response.unauthorized('Invalid credentials')
+      return response.unauthorized({
+        message: 'Invalid credentials',
+      })
     }
   }
 
@@ -57,7 +61,9 @@ export default class AuthenticationController {
         message: 'Account Created Successfully',
       })
     } else {
-      return response.badRequest('Account already exist')
+      return response.badRequest({
+        message: 'Account already exist',
+      })
     }
   }
 
@@ -69,7 +75,7 @@ export default class AuthenticationController {
     let id
     if (user) {
       id = user.id
-    
+
       const payload = await request.validate(UserValidator)
       if (auth.use('api').isLoggedIn) {
         const userDB = await User.findOrFail(id)
@@ -89,10 +95,14 @@ export default class AuthenticationController {
           })
         } catch (err) {
           console.log('Error Auth Controller: ', err)
-          return response.internalServerError('Server Error')
+          return response.internalServerError({
+            message: 'Server Error',
+          })
         }
       } else {
-        return response.forbidden('Please login first')
+        return response.forbidden({
+          message: 'Please login first',
+        })
       }
     }
   }
@@ -101,7 +111,7 @@ export default class AuthenticationController {
   public async destroy({ auth, response }: HttpContextContract) {
     await auth.use('api').revoke()
 
-    return response.status(200).json({
+    return response.ok({
       message: 'Successfully logged out',
     })
   }

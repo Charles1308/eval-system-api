@@ -1,11 +1,11 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
-import Ipcr from 'App/Models/Ipcr'
+import Opcr from 'App/Models/Opcr'
 
-export default class IpcrsController {
+export default class OpcrsController {
   public async index({ response }: HttpContextContract) {
-    const ipcr = await Ipcr.all()
+    const opcr = await Opcr.all()
 
-    return response.ok({ ipcr })
+    return response.ok({ opcr })
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
@@ -14,13 +14,13 @@ export default class IpcrsController {
     const payload = JSON.stringify(request.body().payload)
 
     try {
-      const ipcr = await Ipcr.create({
+      const opcr = await Opcr.create({
         userId: auth.user?.id,
         payload,
       })
 
       return response.created({
-        ipcr,
+        opcr,
         message: 'Successfully Created',
       })
     } catch (err) {
@@ -29,19 +29,19 @@ export default class IpcrsController {
         message: 'Server Error',
       })
     }
-  } 
+  }
 
   public async show({ request, response }: HttpContextContract) {
     const { id } = request.params()
 
     try {
-      const ipcr = await Ipcr.findOrFail(id)
+      const opcr = await Opcr.findOrFail(id)
 
-      return response.ok({ ipcr })
+      return response.ok({ opcr })
     } catch (err) {
       console.log(err)
       return response.notFound({
-        message: 'That IPCR may not exist',
+        message: 'That Opcr may not exist',
       })
     }
   }
@@ -60,18 +60,18 @@ export default class IpcrsController {
     const payload = JSON.stringify(request.body().payload)
 
     try {
-      const ipcr = await Ipcr.findOrFail(id)
-      ipcr.payload = payload
+      const opcr = await Opcr.findOrFail(id)
+      opcr.payload = payload
 
-      await ipcr?.save()
+      await opcr?.save()
       return response.ok({
-        ipcr,
+        opcr,
         message: 'Successfully Updated',
       })
     } catch (err) {
       console.log(err)
       return response.notFound({
-        message: 'That IPCR may not exist',
+        message: 'That Opcr may not exist',
       })
     }
   }
@@ -80,9 +80,9 @@ export default class IpcrsController {
     await auth.use('api').authenticate()
     const { id } = request.params()
 
-    const ipcr = await Ipcr.findOrFail(id)
+    const opcr = await Opcr.findOrFail(id)
 
-    await ipcr.delete()
+    await opcr.delete()
     return response.ok({
       message: 'Successfully Deleted',
     })
