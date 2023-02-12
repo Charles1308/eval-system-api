@@ -3,7 +3,7 @@ import Ipcr from 'App/Models/Ipcr'
 
 export default class IpcrsController {
   public async index({ response }: HttpContextContract) {
-    const ipcr = await Ipcr.all()
+    const ipcr = await Ipcr.query().preload('user')
 
     return response.ok({ ipcr })
   }
@@ -29,13 +29,13 @@ export default class IpcrsController {
         message: 'Server Error',
       })
     }
-  } 
+  }
 
   public async show({ request, response }: HttpContextContract) {
     const { id } = request.params()
 
     try {
-      const ipcr = await Ipcr.findOrFail(id)
+      const ipcr = await Ipcr.query().where('id', id).preload('user').first()
 
       return response.ok({ ipcr })
     } catch (err) {
