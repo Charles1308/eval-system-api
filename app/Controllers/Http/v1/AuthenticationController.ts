@@ -1,6 +1,8 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
 import UserValidator from 'App/Validators/UserValidator'
+import Hash from '@ioc:Adonis/Core/Hash'
+import UserUpdateValidator from 'App/Validators/UserUpdateValidator'
 
 export default class AuthenticationController {
   // Verify
@@ -76,7 +78,8 @@ export default class AuthenticationController {
     if (user) {
       id = user.id
 
-      const payload = await request.validate(UserValidator)
+      const payload = await request.validate(UserUpdateValidator)
+
       if (auth.use('api').isLoggedIn) {
         const userDB = await User.findOrFail(id)
 
@@ -114,5 +117,18 @@ export default class AuthenticationController {
     return response.ok({
       message: 'Successfully logged out',
     })
+  }
+
+  // Password check
+  public async passwordCheck({ auth, request, response }: HttpContextContract) {
+    await auth.use('api').authenticate()
+    const { password } = request.body()
+
+    const id = auth.use('api').user?.id
+
+    const userDB = await User.findOrFail(id)
+    const result = await Hash.verify(userDB.password, password)
+
+    return response.ok(result)
   }
 }
