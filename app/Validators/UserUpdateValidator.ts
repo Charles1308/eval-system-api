@@ -24,28 +24,16 @@ export default class UserUpdateValidator {
    *    ```
    */
   public schema = schema.create({
-    email: schema.string.optional({}, [rules.email(), rules.required()]),
+    email: schema.string.optional({}, [rules.email()]),
     // password: schema.string({}, [rules.confirmed(), rules.minLength(8), rules.required()]),
-    password: schema.string.optional({}, [rules.minLength(8), rules.required()]),
+    password: schema.string.optional({}, [rules.minLength(8)]),
 
-    firstName: schema.string.optional({}, [rules.minLength(2), rules.required()]),
-    lastName: schema.string.optional({}, [rules.minLength(2), rules.required()]),
+    firstName: schema.string.optional({}, [rules.minLength(2)]),
+    lastName: schema.string.optional({}, [rules.minLength(2)]),
     middleName: schema.string.optional(),
 
-    office: schema.enum.optional(
-      [
-        'Professor',
-        'Instructor',
-        'Guest Lecturer',
-        'Assistant Professor',
-        'Associate Professor',
-        'Administrative Staff',
-        'Coordinator (Associate Professor/Professor)',
-        'Coordinator  (Instructor/Assistant Professor)',
-      ] as const,
-      [rules.required()]
-    ),
-    course: schema.string.optional({}, [rules.minLength(4), rules.required()]),
+    role: schema.enum.optional(['FACULTY', 'DEPARTMENT-CHAIRPERSON', 'STAFF', 'DEAN'] as const),
+    course: schema.string.optional({}, [rules.minLength(4)]),
   })
 
   /**

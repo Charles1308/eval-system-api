@@ -33,19 +33,6 @@ export default class UserValidator {
     lastName: schema.string({}, [rules.minLength(2), rules.required()]),
     middleName: schema.string.optional(),
 
-    office: schema.enum(
-      [
-        'Professor',
-        'Instructor',
-        'Guest Lecturer',
-        'Assistant Professor',
-        'Associate Professor',
-        'Administrative Staff',
-        'Coordinator (Associate Professor/Professor)',
-        'Coordinator  (Instructor/Assistant Professor)',
-      ] as const,
-      [rules.required()]
-    ),
     course: schema.string({}, [rules.minLength(4), rules.required()]),
   })
 

@@ -1,5 +1,6 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
+import Role from 'App/Models/Role'
 import UserValidator from 'App/Validators/UserValidator'
 import Hash from '@ioc:Adonis/Core/Hash'
 import UserUpdateValidator from 'App/Validators/UserUpdateValidator'
@@ -49,6 +50,10 @@ export default class AuthenticationController {
     }
 
     const userData = await User.firstOrCreate(searchPayload, payload)
+    const role = await Role.findByOrFail('name', request.body().roles)
+
+    console.log(role.id)
+    await userData.related('roles').attach([role.id])
 
     if (userData.$isLocal) {
       const userToken = await auth.use('api').generate(userData)
@@ -79,14 +84,18 @@ export default class AuthenticationController {
       id = user.id
 
       const payload = await request.validate(UserUpdateValidator)
-
+      
       if (auth.use('api').isLoggedIn) {
         const userDB = await User.findOrFail(id)
+        const role = await Role.findByOrFail('name', request.body().roles)
 
         try {
           userDB.merge(payload)
+          await userDB.related('roles').sync([role.id], false)
+
           await userDB.save()
           const userToken = await auth.use('api').generate(userDB)
+
 
           const { type, token, user } = userToken
 
