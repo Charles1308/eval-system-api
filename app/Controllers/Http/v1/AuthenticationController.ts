@@ -9,10 +9,13 @@ export default class AuthenticationController {
   // Verify
   public async verify({ auth, response }: HttpContextContract) {
     await auth.use('api').check()
-    const user = auth.use('api').user
+    const userAuth = auth.use('api').user
+
+    const userDBData = await User.find(userAuth?.id)
+    await userDBData?.load('roles')
 
     if (auth.use('api').isLoggedIn) {
-      return response.ok(user)
+      return response.ok(userDBData)
     } else {
       return response.unauthorized({
         message: 'Invalid credentials',
@@ -28,10 +31,13 @@ export default class AuthenticationController {
       const userToken = await auth.use('api').attempt(email, password)
       const { type, token, user } = userToken
 
+      const userDBData = await User.find(user?.id)
+      await userDBData?.load('roles')
+
       return response.ok({
         type,
         token,
-        user,
+        user: userDBData,
         message: 'Successfully logged in',
       })
     } catch {
@@ -52,7 +58,6 @@ export default class AuthenticationController {
     const userData = await User.firstOrCreate(searchPayload, payload)
     const role = await Role.findByOrFail('name', request.body().roles)
 
-    console.log(role.id)
     await userData.related('roles').attach([role.id])
 
     if (userData.$isLocal) {
@@ -60,11 +65,14 @@ export default class AuthenticationController {
 
       const { type, token, user } = userToken
 
+      const userDBData = await User.find(user?.id)
+      await userDBData?.load('roles')
+
       // console.log(auth.user)
       return response.created({
         type,
         token,
-        user,
+        user: userDBData,
         message: 'Account Created Successfully',
       })
     } else {
@@ -91,18 +99,20 @@ export default class AuthenticationController {
 
         try {
           userDB.merge(payload)
-          await userDB.related('roles').sync([role.id], false)
-
+          
           await userDB.save()
+          await userDB.related('roles').sync([role.id])
           const userToken = await auth.use('api').generate(userDB)
-
 
           const { type, token, user } = userToken
 
+          const userDBData = await User.find(user?.id)
+          await userDBData?.load('roles')
+    
           return response.accepted({
             type,
             token,
-            user,
+            user: userDBData,
             message: 'Successfully Updated Account',
           })
         } catch (err) {

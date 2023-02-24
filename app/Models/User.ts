@@ -9,8 +9,6 @@ import {
   computed, 
   manyToMany, 
   ManyToMany, 
-  beforeFetch,   
-  beforeFind
 } from '@ioc:Adonis/Lucid/Orm'
 import Ipcr from './Ipcr'
 import Opcr from './Opcr'
