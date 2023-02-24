@@ -21,3 +21,4 @@
 
 import 'App/Routes/Authentication'
 import 'App/Routes/IPCR'
+import 'App/Routes/OPCR'

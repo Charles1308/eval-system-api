@@ -1,8 +1,18 @@
 import { DateTime } from 'luxon'
 import Hash from '@ioc:Adonis/Core/Hash'
-import { column, beforeSave, BaseModel, hasMany, HasMany, computed } from '@ioc:Adonis/Lucid/Orm'
+import { 
+  column, 
+  beforeSave, 
+  BaseModel, 
+  hasMany, 
+  HasMany, 
+  computed, 
+  manyToMany, 
+  ManyToMany, 
+} from '@ioc:Adonis/Lucid/Orm'
 import Ipcr from './Ipcr'
 import Opcr from './Opcr'
+import Role from './Role'
 
 export default class User extends BaseModel {
   @column({ isPrimary: true })
@@ -27,7 +37,7 @@ export default class User extends BaseModel {
   public middleName?: string
 
   @column()
-  public office: string
+  public role: string
 
   @column()
   public course: string
@@ -43,6 +53,11 @@ export default class User extends BaseModel {
 
   @hasMany(() => Opcr)
   public opcrs: HasMany<typeof Opcr>
+
+  @manyToMany(() => Role, {
+    pivotTable: 'user_role',
+  })
+  public roles: ManyToMany<typeof Role>
 
   @beforeSave()
   public static async hashPassword(user: User) {

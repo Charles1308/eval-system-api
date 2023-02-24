@@ -1,15 +1,21 @@
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import User from 'App/Models/User'
+import Role from 'App/Models/Role'
 import UserValidator from 'App/Validators/UserValidator'
+import Hash from '@ioc:Adonis/Core/Hash'
+import UserUpdateValidator from 'App/Validators/UserUpdateValidator'
 
 export default class AuthenticationController {
   // Verify
   public async verify({ auth, response }: HttpContextContract) {
     await auth.use('api').check()
-    const user = auth.use('api').user
+    const userAuth = auth.use('api').user
+
+    const userDBData = await User.find(userAuth?.id)
+    await userDBData?.load('roles')
 
     if (auth.use('api').isLoggedIn) {
-      return response.ok(user)
+      return response.ok(userDBData)
     } else {
       return response.unauthorized({
         message: 'Invalid credentials',
@@ -25,10 +31,13 @@ export default class AuthenticationController {
       const userToken = await auth.use('api').attempt(email, password)
       const { type, token, user } = userToken
 
+      const userDBData = await User.find(user?.id)
+      await userDBData?.load('roles')
+
       return response.ok({
         type,
         token,
-        user,
+        user: userDBData,
         message: 'Successfully logged in',
       })
     } catch {
@@ -47,17 +56,23 @@ export default class AuthenticationController {
     }
 
     const userData = await User.firstOrCreate(searchPayload, payload)
+    const role = await Role.findByOrFail('name', request.body().roles)
+
+    await userData.related('roles').attach([role.id])
 
     if (userData.$isLocal) {
       const userToken = await auth.use('api').generate(userData)
 
       const { type, token, user } = userToken
 
+      const userDBData = await User.find(user?.id)
+      await userDBData?.load('roles')
+
       // console.log(auth.user)
       return response.created({
         type,
         token,
-        user,
+        user: userDBData,
         message: 'Account Created Successfully',
       })
     } else {
@@ -76,21 +91,28 @@ export default class AuthenticationController {
     if (user) {
       id = user.id
 
-      const payload = await request.validate(UserValidator)
+      const payload = await request.validate(UserUpdateValidator)
+      
       if (auth.use('api').isLoggedIn) {
         const userDB = await User.findOrFail(id)
+        const role = await Role.findByOrFail('name', request.body().roles)
 
         try {
           userDB.merge(payload)
+          
           await userDB.save()
+          await userDB.related('roles').sync([role.id])
           const userToken = await auth.use('api').generate(userDB)
 
           const { type, token, user } = userToken
 
+          const userDBData = await User.find(user?.id)
+          await userDBData?.load('roles')
+    
           return response.accepted({
             type,
             token,
-            user,
+            user: userDBData,
             message: 'Successfully Updated Account',
           })
         } catch (err) {
@@ -114,5 +136,18 @@ export default class AuthenticationController {
     return response.ok({
       message: 'Successfully logged out',
     })
+  }
+
+  // Password check
+  public async passwordCheck({ auth, request, response }: HttpContextContract) {
+    await auth.use('api').authenticate()
+    const { password } = request.body()
+
+    const id = auth.use('api').user?.id
+
+    const userDB = await User.findOrFail(id)
+    const result = await Hash.verify(userDB.password, password)
+
+    return response.ok(result)
   }
 }

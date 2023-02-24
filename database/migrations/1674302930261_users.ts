@@ -13,8 +13,7 @@ export default class extends BaseSchema {
       table.string('first_name')
       table.string('middle_name').nullable()
       table.string('last_name')
-      table.string('course')
-      table.string('office')
+      table.string('course').nullable()
 
       /**
        * Uses timestampz for PostgreSQL and DATETIME2 for MSSQL

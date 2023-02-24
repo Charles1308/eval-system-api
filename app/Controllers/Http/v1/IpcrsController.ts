@@ -2,8 +2,9 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Ipcr from 'App/Models/Ipcr'
 
 export default class IpcrsController {
-  public async index({ response }: HttpContextContract) {
-    const ipcr = await Ipcr.query().preload('user')
+  public async index({ request, response }: HttpContextContract) {
+    const { page, limit = 10 } = request.all()
+    const ipcr = await Ipcr.query().preload('user').paginate(page, limit)
 
     return response.ok({ ipcr })
   }

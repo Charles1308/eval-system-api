@@ -1,10 +1,9 @@
-import { schema, CustomMessages, rules, validator } from '@ioc:Adonis/Core/Validator'
+import { schema, CustomMessages, rules } from '@ioc:Adonis/Core/Validator'
 import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 
-export default class UserValidator {
+export default class UserUpdateValidator {
   constructor(protected ctx: HttpContextContract) {}
 
-  public reporter = validator.reporters.api
   /*
    * Define schema to validate the "shape", "type", "formatting" and "integrity" of data.
    *
@@ -25,15 +24,16 @@ export default class UserValidator {
    *    ```
    */
   public schema = schema.create({
-    email: schema.string({}, [rules.email(), rules.required()]),
+    email: schema.string.optional({}, [rules.email()]),
     // password: schema.string({}, [rules.confirmed(), rules.minLength(8), rules.required()]),
-    password: schema.string({}, [rules.minLength(8), rules.required()]),
+    password: schema.string.optional({}, [rules.minLength(8)]),
 
-    firstName: schema.string({}, [rules.minLength(2), rules.required()]),
-    lastName: schema.string({}, [rules.minLength(2), rules.required()]),
+    firstName: schema.string.optional({}, [rules.minLength(2)]),
+    lastName: schema.string.optional({}, [rules.minLength(2)]),
     middleName: schema.string.optional(),
 
-    course: schema.string({}, [rules.minLength(4), rules.required()]),
+    role: schema.enum.optional(['FACULTY', 'DEPARTMENT-CHAIRPERSON', 'STAFF', 'DEAN'] as const),
+    course: schema.string.optional({}, [rules.minLength(4)]),
   })
 
   /**

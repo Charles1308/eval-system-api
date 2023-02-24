@@ -3,6 +3,7 @@ import Route from '@ioc:Adonis/Core/Route'
 
 Route.group(() => {
   Route.get('/verify', 'AuthenticationController.verify')
+  Route.post('/password-check', 'AuthenticationController.passwordCheck')
 
   Route.post('/sign-in', 'AuthenticationController.index')
   Route.post('/sign-up', 'AuthenticationController.store')
