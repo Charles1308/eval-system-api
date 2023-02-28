@@ -11,11 +11,17 @@ export default class AuthenticationController {
     await auth.use('api').check()
     const userAuth = auth.use('api').user
 
-    const userDBData = await User.find(userAuth?.id)
-    await userDBData?.load('roles')
+    if (userAuth?.id) {
+      const userDBData = await User.findOrFail(userAuth?.id)
+      await userDBData?.load('roles')
 
-    if (auth.use('api').isLoggedIn) {
-      return response.ok(userDBData)
+      if (auth.use('api').isLoggedIn) {
+        return response.ok(userDBData)
+      } else {
+        return response.unauthorized({
+          message: 'Invalid credentials',
+        })
+      }
     } else {
       return response.unauthorized({
         message: 'Invalid credentials',
