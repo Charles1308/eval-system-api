@@ -9,7 +9,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 import URL from 'url-parse'
 
-const PROD_MYSQL_DB = new URL(Env.get("CLEARDB_DATABASE_URL"));
+const PROD_MYSQL_DB = new URL(Env.get("CLEARDB_DATABASE_URL", 'mysql://be286f7903988a:ab4cc98c@us-cdbr-east-06.cleardb.net/heroku_864e2651b302016?reconnect=true'));
 const databaseConfig: DatabaseConfig = {
   /*
   |--------------------------------------------------------------------------
@@ -21,7 +21,7 @@ const databaseConfig: DatabaseConfig = {
   | file.
   |
   */
-  connection: Env.get('DB_CONNECTION'),
+  connection: Env.get('DB_CONNECTION', 'mysql://be286f7903988a:ab4cc98c@us-cdbr-east-06.cleardb.net/heroku_864e2651b302016?reconnect=true'),
 
   connections: {
     /*
