@@ -9,7 +9,7 @@ import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
 import URL from 'url-parse'
 
-const PROD_MYSQL_DB = new URL(Env.get("CLEARDB_DATABASE_URL", 'mysql://be286f7903988a:ab4cc98c@us-cdbr-east-06.cleardb.net/heroku_864e2651b302016?reconnect=true'));
+const PROD_MYSQL_DB = new URL(Env.get("CLEARDB_DATABASE_URL"));
 const databaseConfig: DatabaseConfig = {
   /*
   |--------------------------------------------------------------------------
@@ -21,7 +21,7 @@ const databaseConfig: DatabaseConfig = {
   | file.
   |
   */
-  connection: Env.get('DB_CONNECTION', 'mysql://be286f7903988a:ab4cc98c@us-cdbr-east-06.cleardb.net/heroku_864e2651b302016?reconnect=true'),
+  connection: Env.get('DB_CONNECTION'),
 
   connections: {
     /*
@@ -38,11 +38,11 @@ const databaseConfig: DatabaseConfig = {
     mysql: {
       client: 'mysql2',
       connection: {
-        host: Env.get('MYSQL_HOST', PROD_MYSQL_DB.host),
+        host: PROD_MYSQL_DB.host as string,
         port: Env.get('MYSQL_PORT', ''),
-        user: Env.get('MYSQL_USER', PROD_MYSQL_DB.username),
-        password: Env.get('MYSQL_PASSWORD', PROD_MYSQL_DB.password),
-        database: Env.get('MYSQL_DB_NAME', PROD_MYSQL_DB.pathname.substr(1)),
+        user: PROD_MYSQL_DB.username as string,
+        password: PROD_MYSQL_DB.password as string,
+        database: PROD_MYSQL_DB.pathname.substr(1) as string,
       },
       migrations: {
         naturalSort: true,
