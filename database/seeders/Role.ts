@@ -7,30 +7,38 @@ export default class extends BaseSeeder {
     await Role.createMany([
       {
         name: 'DEAN',
-        permissions: ['create-opcr', 'view-opcr']
+        permissions: [
+          'create-opcr',
+          'view-opcr',
+          'edit-opcr',
+          'print-opcr',
+        ]
       },
       {
         name: 'FACULTY',
         permissions: [
           'create-ipcr',
+          'edit-ipcr',
           'view-ipcr',
-          'create-opcr',
-          'view-opcr',
         ]
       },
       {
         name: 'DEPARTMENT-CHAIRPERSON',
         permissions: [
           'create-ipcr',
+          'edit-ipcr',
+          'view-ipcr',
+          'print-ipcr',
+        ]
+      },
+      {
+        name: 'STAFF',
+        permissions: [
           'view-ipcr',
           'view-opcr',
           'print-ipcr',
           'print-opcr',
         ]
-      },
-      {
-        name: 'STAFF',
-        permissions: [ 'print-ipcr', 'print-opcr' ]
       },
     ])
   }
