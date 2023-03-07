@@ -43,11 +43,36 @@ export default class InfosController {
           1 ASC
       `
       const graphData = await Database.rawQuery(query)
-  
+      
+      const formsQuery = (type) => `
+        SELECT
+          DATE_FORMAT(created_at, '%Y-%m-01') as month,
+          SUM(count) as count
+        FROM (
+          SELECT
+            created_at,
+            COUNT(*) as count
+          FROM
+            ${type}
+          WHERE
+            created_at >= '${currentYear}-01-01'
+          GROUP BY
+            1
+        ) subquery
+        GROUP BY
+          1
+        ORDER BY
+          1 ASC;
+      `
+      const opcrs = await Database.rawQuery(formsQuery('opcrs'))
+      const ipcrs = await Database.rawQuery(formsQuery('ipcrs'))
+
       const data = {
         totalSubmitted: totalSubmitted[0][0].total_submitted,
         totalUsers: totalUsers[0].total_users,
-        graphData: [ ...graphData[0] ]
+        graphData: graphData[0],
+        ipcrs: ipcrs[0],
+        opcrs: opcrs[0],
       }
   
       return response.ok(data)
