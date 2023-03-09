@@ -57,33 +57,28 @@ export default class AuthenticationController {
   public async store({ auth, request, response }: HttpContextContract) {
     const payload = await request.validate(UserValidator)
 
-    const searchPayload = {
-      email: payload.email,
-    }
-
-    const userData = await User.firstOrCreate(searchPayload, payload)
+    const userData = await User.query().where({ email: payload.email }).first()
     const role = await Role.findByOrFail('name', request.body().roles)
+    
+    if (userData) {
+      return response.badRequest({
+        message: 'Account already exist',
+      })
+    } else {
+      const newUser = await User.create(payload)
+      await newUser.related('roles').attach([role.id])
 
-    await userData.related('roles').attach([role.id])
-
-    if (userData.$isLocal) {
-      const userToken = await auth.use('api').generate(userData)
-
+      const userToken = await auth.use('api').generate(newUser)
       const { type, token, user } = userToken
 
       const userDBData = await User.find(user?.id)
       await userDBData?.load('roles')
 
-      // console.log(auth.user)
       return response.created({
         type,
         token,
         user: userDBData,
         message: 'Account Created Successfully',
-      })
-    } else {
-      return response.badRequest({
-        message: 'Account already exist',
       })
     }
   }
