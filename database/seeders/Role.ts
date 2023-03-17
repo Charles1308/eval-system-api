@@ -12,6 +12,7 @@ export default class extends BaseSeeder {
           'view-opcr',
           'edit-opcr',
           'print-opcr',
+          'view-ipcr',
         ]
       },
       {
