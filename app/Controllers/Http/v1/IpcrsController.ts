@@ -2,11 +2,23 @@ import type { HttpContextContract } from '@ioc:Adonis/Core/HttpContext'
 import Ipcr from 'App/Models/Ipcr'
 
 export default class IpcrsController {
-  public async index({ request, response }: HttpContextContract) {
+  public async index({ auth, request, response }: HttpContextContract) {
+    await auth.use('api').authenticate()
     const { page, limit = 10 } = request.all()
-    const ipcr = await Ipcr.query().preload('user').paginate(page, limit)
+    
+    const authUser = auth.use('api').user
+    await authUser?.load('roles')
 
-    return response.ok({ ipcr })
+    if (authUser?.roles && authUser.roles[0].name === 'FACULTY') {
+      const userId = authUser.id
+      const ipcr = await Ipcr.query().where('user_id', userId).preload('user').paginate(page, limit)
+  
+      return response.ok({ ipcr })
+    } else {
+      const ipcr = await Ipcr.query().preload('user').paginate(page, limit)
+  
+      return response.ok({ ipcr })
+    }
   }
 
   public async store({ auth, request, response }: HttpContextContract) {
