@@ -7,9 +7,6 @@
 
 import Env from '@ioc:Adonis/Core/Env'
 import { DatabaseConfig } from '@ioc:Adonis/Lucid/Database'
-import URL from 'url-parse'
-
-const PROD_MYSQL_DB = new URL(Env.get("CLEARDB_DATABASE_URL"));
 
 const databaseConfig: DatabaseConfig = {
   /*
@@ -39,11 +36,11 @@ const databaseConfig: DatabaseConfig = {
     mysql: {
       client: 'mysql2',
       connection: {
-        host: PROD_MYSQL_DB.host as string,
+        host: Env.get('MYSQL_HOST'),
         port: Env.get('MYSQL_PORT', ''),
-        user: PROD_MYSQL_DB.username as string,
-        password: PROD_MYSQL_DB.password as string,
-        database: PROD_MYSQL_DB.pathname.substr(1) as string,
+        user: Env.get('MYSQL_USER'),
+        password: Env.get('MYSQL_PASSWORD'),
+        database: Env.get('MYSQL_DB_NAME'),
       },
       migrations: {
         naturalSort: true,
